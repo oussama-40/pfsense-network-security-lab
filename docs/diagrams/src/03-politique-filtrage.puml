@@ -1,0 +1,74 @@
+@startuml
+title Politique de filtrage inter-zones — pfSense-A
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 13
+skinparam defaultTextAlignment center
+skinparam roundCorner 8
+skinparam ArrowColor black
+skinparam sequenceMessageAlign center
+skinparam node {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam cloud {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam component {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam actor {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam sequence {
+  LifeLineBorderColor black
+  LifeLineBackgroundColor white
+  GroupBackgroundColor white
+}
+skinparam ActivityBackgroundColor white
+skinparam ActivityBorderColor black
+skinparam PartitionBorderColor black
+skinparam PartitionBackgroundColor white
+
+rectangle "GUEST\n10.10.3.0/24" as guest
+rectangle "DMZ\n10.10.2.0/24" as dmz
+rectangle "LAN\n10.10.1.0/24" as lan
+rectangle "pfSense-A\n(pare-feu lui-même)" as fw
+rectangle "WAN" as wan
+
+guest .right.> dmz : BLOQUÉ
+dmz .right.> lan : BLOQUÉ
+guest ..> lan : BLOQUÉ
+
+guest -down-> wan : AUTORISÉ
+lan -down-> wan : AUTORISÉ
+dmz -down-> fw : AUTORISÉ\n(ICMP uniquement)
+
+legend bottom
+  Trait plein : trafic autorisé
+  Trait pointillé : trafic bloqué
+  Règles : "Bloquer GUEST vers DMZ", "Bloquer DMZ vers LAN",
+  "Bloquer GUEST vers LAN", "Autoriser GUEST vers WAN",
+  "Autoriser ping DMZ vers pfSense", LAN vers any (règle par défaut)
+endlegend
+
+
+@enduml

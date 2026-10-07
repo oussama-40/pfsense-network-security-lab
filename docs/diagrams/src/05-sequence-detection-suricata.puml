@@ -1,0 +1,73 @@
+@startuml
+title Détection et blocage d'un scan Nmap par Suricata
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 13
+skinparam defaultTextAlignment center
+skinparam roundCorner 8
+skinparam ArrowColor black
+skinparam sequenceMessageAlign center
+skinparam node {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam cloud {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam component {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam actor {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam sequence {
+  LifeLineBorderColor black
+  LifeLineBackgroundColor white
+  GroupBackgroundColor white
+}
+skinparam ActivityBackgroundColor white
+skinparam ActivityBorderColor black
+skinparam PartitionBorderColor black
+skinparam PartitionBackgroundColor white
+autonumber
+
+actor "Administrateur" as admin
+participant "Kali-Lab\n10.10.2.50" as kali
+participant "pfSense-A\ninterface DMZ 10.10.2.1" as pfa
+participant "Suricata\n(ET Open, Legacy Mode,\nBlock Offenders)" as suri
+
+kali -> pfa : ping 10.10.2.1
+pfa --> kali : réponses reçues (avant le scan)
+
+kali -> pfa : nmap -n -sS -A 10.10.2.1
+pfa -> suri : inspection du trafic de l'interface DMZ
+suri -> suri : alerte "SURICATA ICMPv4 unknown code"\n(GID:SID 1:2200025)\nsource 10.10.2.50, destination 10.10.2.1
+suri -> pfa : blocage de l'hôte source\n(Block Offenders, Kill States)
+
+kali -> pfa : ping 10.10.2.1
+pfa -[#black]x kali : aucune réponse (100 % de perte)
+
+admin -> suri : Services > Suricata > Blocks\nsuppression du blocage de 10.10.2.50
+
+kali -> pfa : ping 10.10.2.1
+pfa --> kali : réponses reçues (après déblocage)
+
+@enduml

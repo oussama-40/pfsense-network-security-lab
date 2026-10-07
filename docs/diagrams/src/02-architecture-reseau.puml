@@ -1,0 +1,84 @@
+@startuml
+title Architecture réseau du laboratoire — Network Security Lab
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 13
+skinparam defaultTextAlignment center
+skinparam roundCorner 8
+skinparam ArrowColor black
+skinparam sequenceMessageAlign center
+skinparam node {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam cloud {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam component {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam actor {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam sequence {
+  LifeLineBorderColor black
+  LifeLineBackgroundColor white
+  GroupBackgroundColor white
+}
+skinparam ActivityBackgroundColor white
+skinparam ActivityBorderColor black
+skinparam PartitionBorderColor black
+skinparam PartitionBackgroundColor white
+
+rectangle "Hôte Windows — Oracle VirtualBox (réseaux internes)" as host {
+
+  rectangle "SITE A" as sitea {
+    node "Client-A\nUbuntu\n10.10.1.10" as clienta
+    node "Kali-Lab\nattaquant\n10.10.2.50 (test DMZ)\n10.10.3.50 (test GUEST)" as kali
+    node "**pfSense-A**\npfSense CE 2.7.2\nSuricata (interface DMZ)" as pfa
+    cloud "LAN-A\n10.10.1.0/24" as lana
+    cloud "DMZ-A\n10.10.2.0/24" as dmza
+    cloud "GUEST-A\n10.10.3.0/24" as guesta
+  }
+
+  cloud "WAN-LINK\n10.99.99.0/24" as wan
+
+  rectangle "SITE B" as siteb {
+    node "**pfSense-B**\npfSense CE 2.7.2" as pfb
+    cloud "LAN-B\n10.20.1.0/24" as lanb
+    node "Client-B\n10.20.1.10" as clientb
+  }
+}
+
+clienta -- lana
+lana -- pfa : LAN\n10.10.1.1
+kali -- dmza
+kali .. guesta : rebranché\npour le test GUEST
+dmza -- pfa : DMZ\n10.10.2.1
+guesta -- pfa : GUEST\n10.10.3.1
+pfa -- wan : WAN\n10.99.99.1
+wan -- pfb : WAN\n10.99.99.2
+pfb -- lanb : LAN\n10.20.1.1
+lanb -- clientb
+
+pfa <..> pfb : tunnel IPsec (IKEv2, ESP)
+
+@enduml

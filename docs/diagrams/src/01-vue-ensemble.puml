@@ -1,0 +1,90 @@
+@startuml
+title Vue d'ensemble du projet — Network Security Lab
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 13
+skinparam defaultTextAlignment center
+skinparam roundCorner 8
+skinparam ArrowColor black
+skinparam sequenceMessageAlign center
+skinparam node {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam cloud {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam component {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam actor {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam sequence {
+  LifeLineBorderColor black
+  LifeLineBackgroundColor white
+  GroupBackgroundColor white
+}
+skinparam ActivityBackgroundColor white
+skinparam ActivityBorderColor black
+skinparam PartitionBorderColor black
+skinparam PartitionBackgroundColor white
+
+start
+
+:**Étape 1** — Création des machines virtuelles
+VirtualBox : pfSense-A (4 adaptateurs), pfSense-B (2),
+Kali, Client-A, Client-B (réseaux internes);
+
+:**Étape 2** — Configuration réseau
+Interfaces WAN / LAN / DMZ / GUEST sur pfSense-A,
+WAN / LAN sur pfSense-B, IP statiques sur les clients;
+
+:**Étape 3** — Règles de pare-feu
+LAN, DMZ et GUEST sur pfSense-A;
+
+:**Étape 4** — Tests de segmentation
+GUEST et DMZ bloqués vers le LAN,
+vérification dans les journaux du pare-feu;
+
+:**Étape 5** — Tunnel VPN IPsec site-to-site
+IKEv2, pfSense-A vers pfSense-B,
+validation : ping Client-A vers Client-B + paquets ESP;
+
+:**Étape 6** — IDS/IPS Suricata
+Règles Emerging Threats Open,
+interface DMZ, Block Offenders;
+
+:**Étape 7** — Test de détection depuis Kali
+nmap sur l'interface DMZ de pfSense-A;
+
+if (Alerte Suricata générée ?) then (oui)
+  :Hôte Kali (10.10.2.50) bloqué
+  par Block Offenders;
+  :Déblocage manuel
+  (Services > Suricata > Blocks);
+  :Connectivité Kali rétablie;
+else (non)
+  :Aucun blocage;
+endif
+
+stop
+@enduml

@@ -1,0 +1,73 @@
+@startuml
+title Établissement du tunnel IPsec site-to-site et trafic chiffré
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 13
+skinparam defaultTextAlignment center
+skinparam roundCorner 8
+skinparam ArrowColor black
+skinparam sequenceMessageAlign center
+skinparam node {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam cloud {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam component {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam actor {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam sequence {
+  LifeLineBorderColor black
+  LifeLineBackgroundColor white
+  GroupBackgroundColor white
+}
+skinparam ActivityBackgroundColor white
+skinparam ActivityBorderColor black
+skinparam PartitionBorderColor black
+skinparam PartitionBackgroundColor white
+autonumber
+
+participant "Client-A\n10.10.1.10" as ca
+participant "pfSense-A\nWAN 10.99.99.1" as pfa
+participant "pfSense-B\nWAN 10.99.99.2" as pfb
+participant "Client-B\n10.20.1.10" as cb
+
+== Phase 1 — IKEv2 ==
+pfa <-> pfb : négociation IKEv2\n(Mutual PSK, AES-256, SHA256, DH groupe 14)
+note over pfa, pfb : SA IKE établie\n(Status > IPsec : Established)
+
+== Phase 2 — SA enfant (ESP) ==
+pfa <-> pfb : négociation de la phase 2\nESP, AES-256, SHA256\n10.10.1.0/24 <-> 10.20.1.0/24
+note over pfa, pfb : SA de phase 2 installée
+
+== Trafic à travers le tunnel ==
+ca -> pfa : ping 10.20.1.10
+pfa -> pfb : paquet encapsulé en ESP\n(10.99.99.1 vers 10.99.99.2)
+pfb -> cb : ICMP echo request
+cb --> pfb : ICMP echo reply
+pfb --> pfa : paquet encapsulé en ESP\n(10.99.99.2 vers 10.99.99.1)
+pfa --> ca : réponses reçues\n(0 % de perte)
+
+@enduml
